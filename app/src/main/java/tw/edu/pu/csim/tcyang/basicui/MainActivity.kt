@@ -23,14 +23,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.TextStyle
 import tw.edu.pu.csim.tcyang.basicui.ui.theme.BasicUITheme
-
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,6 +50,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Main(modifier: Modifier = Modifier, activity: Activity) {
+    // 動物圖片資源
     val animals = listOf(
         R.drawable.animal0, R.drawable.animal1,
         R.drawable.animal2, R.drawable.animal3,
@@ -56,35 +59,56 @@ fun Main(modifier: Modifier = Modifier, activity: Activity) {
         R.drawable.animal8, R.drawable.animal9
     )
 
+    // 動物名稱列表
     val animalsName = listOf("鴨子", "企鵝", "青蛙", "貓頭鷹", "海豚", "牛", "無尾熊", "獅子", "狐狸", "小雞")
 
+    // 使用 remember 和 mutableStateOf 管理按鈕按下的狀態
     var flag by remember { mutableStateOf("text") }
-    var mper: MediaPlayer? by remember { mutableStateOf(null) }
 
+    // 定義 MediaPlayer 變數
+    var mper: MediaPlayer? = null
+
+    // 取得當前的 Context
+    val context = LocalContext.current
+
+    // 使用 DisposableEffect 來管理 MediaPlayer 的生命週期
+    // 當 Main Composable 離開組合時，會執行 onDispose 區塊
+    DisposableEffect(Unit) { // Unit 作為 key 表示這個 effect 只會執行一次
+        onDispose {
+            // 釋放 MediaPlayer 資源，避免記憶體洩漏
+            mper?.release()
+            mper = null
+        }
+    }
+
+    // 主 UI 結構
     Column(
-        modifier = modifier
+        modifier
             .fillMaxSize()
             .background(Color(0xFFE0BBE4)),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // 顯示應用程式名稱
         Text(
             text = stringResource(R.string.app_title),
             fontSize = 25.sp,
             color = Color.Blue,
-            fontFamily = FontFamily(Font(R.font.kai))
+            fontFamily = FontFamily(Font(R.font.kai)) // 確保 kai.ttf 存在
         )
 
         Spacer(modifier = Modifier.size(10.dp))
 
+        // 顯示作者名稱
         Text(
-            text = stringResource(R.string.app_author),
+            text = "游禎友",  // 更新為新作者名稱
             fontSize = 20.sp,
             color = Color(0xFF654321)
         )
 
         Spacer(modifier = Modifier.size(10.dp))
 
+        // 顯示三個圖示（Android, Compose, Firebase）
         Row(horizontalArrangement = Arrangement.SpaceEvenly) {
             Image(
                 painter = painterResource(id = R.drawable.android),
@@ -111,6 +135,7 @@ fun Main(modifier: Modifier = Modifier, activity: Activity) {
 
         Spacer(modifier = Modifier.size(10.dp))
 
+        // 顯示動物列表
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.padding(horizontal = 16.dp)
@@ -129,70 +154,46 @@ fun Main(modifier: Modifier = Modifier, activity: Activity) {
 
         Spacer(modifier = Modifier.size(20.dp))
 
+        // 按鈕區域
         Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp), // 調整間距
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp) // 填滿寬度並給予左右邊距
         ) {
-            Button(
-                onClick = { /* 歡迎修課功能 */ },
-                modifier = Modifier
-                    .border(1.dp, Color.Blue, CutCornerShape(10.dp))
-                    .padding(1.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
-                shape = CutCornerShape(10.dp),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 10.dp)
-            ) {
-                Text(text = "歡迎修課", color = Color.White)
+            Button(onClick = {
+                flag = if (flag == "text") {
+                    "hello"
+                } else {
+                    "text"
+                }
+            }) {
+                Text(text = "哈摟")
             }
 
-            Button(
-                onClick = { /* 其他功能 */ },
-                modifier = Modifier
-                    .border(1.dp, Color.Blue, CutCornerShape(10.dp))
-                    .padding(1.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
-                shape = CutCornerShape(10.dp),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 10.dp)
-            ) {
-                Text(text = "展翅飛翔", color = Color.White)
+            Button(onClick = {
+                // 實際功能你可以補上
+            }) {
+                Text(text = "歡迎修課")
             }
 
-            Button(
-                onClick = {
-                    mper?.release()
-                    mper = null
-                    mper = MediaPlayer.create(activity, R.raw.fly)
-                    mper?.start()
-                },
-                modifier = Modifier
-                    .border(1.dp, Color.Blue, CutCornerShape(10.dp))
-                    .padding(1.dp)
-                    .fillMaxWidth(0.5f),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
-                shape = CutCornerShape(10.dp),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 10.dp)
-            ) {
-                Text(text = "展翅飛翔", color = Color.White)
-                Spacer(modifier = Modifier.width(8.dp))
-                Image(
-                    painter = painterResource(id = R.drawable.fly),
-                    contentDescription = "fly icon",
-                    modifier = Modifier.size(24.dp)
-                )
+            Button(onClick = {
+                // 播放音樂
+                mper?.release()
+                mper = MediaPlayer.create(activity, R.raw.fly)
+                mper?.start()
+            }) {
+                Text(text = "展翅飛翔")
             }
 
             Button(
                 onClick = {
-                    activity.finish()
+                    activity.finish()  // 呼叫 finish() 來結束應用程式
                 },
                 modifier = Modifier
-                    .border(1.dp, Color.Blue, CutCornerShape(10.dp))
-                    .padding(1.dp),
+                    .border(1.dp, Color.Blue, CutCornerShape(10))
+                    .padding(1.dp), // 避免邊框被內容覆蓋
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00BFFF)),
-                shape = CutCornerShape(10.dp),
+                shape = CutCornerShape(10),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 10.dp)
             ) {
                 Text(text = "結束App")
@@ -201,22 +202,7 @@ fun Main(modifier: Modifier = Modifier, activity: Activity) {
 
         Spacer(modifier = Modifier.size(10.dp))
 
-        Button(
-            onClick = {
-                flag = if (flag == "text") "abc" else "text"
-            },
-            modifier = Modifier
-                .border(1.dp, Color.Blue, CutCornerShape(10.dp))
-                .padding(1.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
-            shape = CutCornerShape(10.dp),
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = 10.dp)
-        ) {
-            Text(text = "按鈕測試", color = Color.White)
-        }
-
-        Spacer(modifier = Modifier.size(10.dp))
-
+        // 顯示按鈕變化的文字
         Text(
             text = flag,
             fontSize = 30.sp,
@@ -225,6 +211,10 @@ fun Main(modifier: Modifier = Modifier, activity: Activity) {
     }
 }
 
-
-// 播放音樂並顯示圖示
-
+@Preview(showBackground = true)
+@Composable
+fun DefaultPreview() {
+    BasicUITheme {
+        Main(activity = Activity())
+    }
+}
