@@ -14,10 +14,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CutCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,10 +25,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.text.TextStyle
 import tw.edu.pu.csim.tcyang.basicui.ui.theme.BasicUITheme
 
 class MainActivity : ComponentActivity() {
@@ -72,14 +68,16 @@ fun Main(modifier: Modifier = Modifier, activity: Activity) {
     val context = LocalContext.current
 
     // 使用 DisposableEffect 來管理 MediaPlayer 的生命週期
-    // 當 Main Composable 離開組合時，會執行 onDispose 區塊
-    DisposableEffect(Unit) { // Unit 作為 key 表示這個 effect 只會執行一次
+    DisposableEffect(Unit) {
         onDispose {
             // 釋放 MediaPlayer 資源，避免記憶體洩漏
             mper?.release()
             mper = null
         }
     }
+
+    // 隨機動物圖片按鈕
+    var randomAnimalImage by remember { mutableStateOf(animals[0]) }
 
     // 主 UI 結構
     Column(
@@ -156,16 +154,12 @@ fun Main(modifier: Modifier = Modifier, activity: Activity) {
 
         // 按鈕區域
         Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp), // 調整間距
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp) // 填滿寬度並給予左右邊距
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
         ) {
             Button(onClick = {
-                flag = if (flag == "text") {
-                    "hello"
-                } else {
-                    "text"
-                }
+                flag = if (flag == "text") "hello" else "text"
             }) {
                 Text(text = "哈摟")
             }
@@ -177,7 +171,6 @@ fun Main(modifier: Modifier = Modifier, activity: Activity) {
             }
 
             Button(onClick = {
-                // 播放音樂
                 mper?.release()
                 mper = MediaPlayer.create(activity, R.raw.fly)
                 mper?.start()
@@ -187,7 +180,7 @@ fun Main(modifier: Modifier = Modifier, activity: Activity) {
 
             Button(
                 onClick = {
-                    activity.finish()  // 呼叫 finish() 來結束應用程式
+                    activity.finish()
                 },
                 modifier = Modifier
                     .border(1.dp, Color.Blue, CutCornerShape(10))
